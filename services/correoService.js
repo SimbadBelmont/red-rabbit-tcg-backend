@@ -42,7 +42,7 @@ async function pedidoNuevo(pedido) {
     await enviar({
         para: pedido.cliente.email,
         asunto: `Recibimos tu pedido ${pedido.folio} — ${TIENDA}`,
-        html: `<h2 style="font-family:Arial,sans-serif;color:#D7262D">¡Gracias, ${escapar(pedido.cliente.nombre)}!</h2>
+        html: `<h2 style="font-family:Arial,sans-serif;color:#DF0E10">¡Gracias, ${escapar(pedido.cliente.nombre)}!</h2>
 <p style="font-family:Arial,sans-serif">Apartamos tus cartas hasta el <b>${hasta}</b>. Te avisaremos cuando tu pedido esté listo para recoger. Pagas al recoger en tienda.</p>${detalle}`,
     });
 
