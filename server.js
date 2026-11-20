@@ -16,10 +16,15 @@ app.use(cors());
 app.use(express.json());
 
 // --- RUTA DE HEALTH CHECK ---
+// Incluye el estado de MongoDB para detectar rápido si la base de datos se desconectó
+const ESTADOS_BD = ['desconectada', 'conectada', 'conectando', 'desconectando'];
 app.get('/api/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        message: 'Servidor operativo',
+    const conectada = mongoose.connection.readyState === 1;
+    res.status(conectada ? 200 : 503).json({
+        status: conectada ? 'OK' : 'ERROR',
+        message: conectada ? 'Servidor operativo' : 'Sin conexión a la base de datos',
+        baseDeDatos: ESTADOS_BD[mongoose.connection.readyState] || 'desconocido',
+        uptimeSeg: Math.round(process.uptime()),
         timestamp: new Date()
     });
 });
@@ -58,6 +63,11 @@ process.on('unhandledRejection', (reason) => {
     app.use('/api/pedidos', pedidoRoutes);
     app.use('/api/eventos', eventoRoutes);
     app.use('/api/wishlist', wishlistRoutes);
+
+    // Rutas de la API que no existen: responder en JSON (no la página HTML de Express)
+    app.use('/api', (req, res) => {
+        res.status(404).json({ error: `No existe la ruta ${req.method} ${req.originalUrl}` });
+    });
 
     // Errores no atrapados en las rutas (Express 5 pasa aquí los errores async)
     app.use((err, req, res, next) => {
