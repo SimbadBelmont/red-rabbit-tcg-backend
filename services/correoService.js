@@ -14,6 +14,15 @@ const transporte = configurado
     : null;
 
 const TIENDA = process.env.NOMBRE_TIENDA || 'Red Rabbit TCG Store';
+// Dirección que ven los clientes como remitente. En Gmail puede ser la misma
+// cuenta (SMTP_USER); en Resend/Brevo debe ser una dirección de tu dominio verificado.
+const REMITENTE = process.env.SMTP_FROM || process.env.SMTP_USER;
+
+if (transporte) {
+    transporte.verify()
+        .then(() => console.log(`Correo listo: ${process.env.SMTP_HOST} como ${REMITENTE}`))
+        .catch((e) => console.error('No se pudo conectar al servidor SMTP:', e.message));
+}
 const escapar = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 async function enviar({ para, asunto, html }) {
@@ -22,7 +31,7 @@ async function enviar({ para, asunto, html }) {
         return;
     }
     try {
-        await transporte.sendMail({ from: `"${TIENDA}" <${process.env.SMTP_USER}>`, to: para, subject: asunto, html });
+        await transporte.sendMail({ from: `"${TIENDA}" <${REMITENTE}>`, to: para, subject: asunto, html });
     } catch (e) {
         // Un correo fallido no debe tumbar el pedido
         console.error('Error al enviar correo:', e.message);
